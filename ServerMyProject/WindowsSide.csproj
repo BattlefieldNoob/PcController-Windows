@@ -42,8 +42,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="UDPer.cs" />
+    <Compile Include="UDPLib.cs" />
+    <Compile Include="TCPLib.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

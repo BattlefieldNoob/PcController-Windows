@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace ServerMyProject
 {
-	public class Server
+	public class TCPLib
 	{
 		const int TCP_PORT_NUMBER = 15010;
 		TcpListener server=new TcpListener(IPAddress.Any,15010);
@@ -16,11 +16,19 @@ namespace ServerMyProject
 		[DllImport("user32.dll")]
 		static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
 
-		public Server ()
+		Dictionary<string,Action<int>> commands = new Dictionary<string, Action<int>>();
+
+		public TCPLib ()
 		{
 			server.Start ();
-			Console.WriteLine("TCP Server started listening");
+			Console.WriteLine("[TCP] Server started listening");
 			server.BeginAcceptSocket (new AsyncCallback(ThreadRun), server);
+			commands.Add ("vol+", _=> {
+				keybd_event((byte)175, 0, 0, 0); // increase volume
+			});
+			commands.Add ("vol-", _=> {
+				keybd_event((byte)174, 0, 0, 0); // increase volume
+			});
 		}
 
 		public void ThreadRun(IAsyncResult ar){
@@ -35,19 +43,19 @@ namespace ServerMyProject
 			byte[] message = new byte[num];
 			Buffer.BlockCopy (bytes, 0, message, 0, num);
 			string command = Encoding.ASCII.GetString (message);
-			Console.WriteLine("Client Say "+command);
-			if(command.Contains("vol+")){
-				keybd_event((byte)175, 0, 0, 0); // increase volume
-			}
-			else if(command.Contains("vol-")){
-				keybd_event((byte)174, 0, 0, 0); // increase volume
+			if(commands.ContainsKey(command)){
+				commands [command].Invoke (0);
 			}
 			startListening ();
 		}
 
 		public void startListening(){
 			byte[] buffer = new byte[30000];
-			socket.BeginReceive (buffer, 0, 30000, SocketFlags.None, onReceive, buffer);
+			try{
+				socket.BeginReceive (buffer, 0, 30000, SocketFlags.None, onReceive, buffer);
+			}catch{
+				Console.WriteLine ("Exception!");
+			}
 		}
 	}
 }

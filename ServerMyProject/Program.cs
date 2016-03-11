@@ -15,20 +15,26 @@ namespace ServerMyProject
 		public static List<Client> clients = new List<Client> ();
 		public static List<string> clientsEndPoints = new List<string> ();
 		const int TCP_IN_PORT_NUMBER = 15020;
-		public static Server server;
+		public static TCPLib server;
 		static PerformanceCounter cpuCounter;
 	
 
 		public static void Main (string[] args)
 		{
 			Console.WriteLine ("Hello Server!");
-			UDPer udp = new UDPer();
+			UDPLib udp = new UDPLib();
 			cpuCounter = new PerformanceCounter();
 			cpuCounter.CategoryName = "Processor";
 			cpuCounter.CounterName = "% Processor Time";
 			cpuCounter.InstanceName = "_Total";
 			//udp.Start();
-			server = new Server ();
+			server = new TCPLib ();
+
+			System.Timers.Timer timer = new System.Timers.Timer(3000);
+			timer.Elapsed += (source,e) => udp.Send("Hello World!");
+			timer.AutoReset=true;
+			timer.Enabled=true;
+
 			ConsoleKeyInfo cki;
 			do
 			{
@@ -43,12 +49,6 @@ namespace ServerMyProject
 					case 'x':
 						udp.Stop();
 						return;
-					case 't':
-						System.Timers.Timer timer = new System.Timers.Timer(4000);
-						timer.Elapsed += (source,e) => udp.Send("Hello World!");
-						timer.AutoReset=true;
-						timer.Enabled=true;
-						break;
 					case 'a':
 						System.Timers.Timer timera = new System.Timers.Timer(4000);
 						timera.Elapsed += (source,e) => BroadcastMessage(getCurrentCpuUsage());
